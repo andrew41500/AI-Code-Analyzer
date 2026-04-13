@@ -1,0 +1,55 @@
+name: AI Code Review
+
+# When to run: on pull requests or pushes to main/master (only if Python files changed)
+on:
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - '**.py'
+  push:
+    branches: [ main, master ]
+    paths:
+      - '**.py'
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Get the code from GitHub
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Need full history to compare changes in PRs
+    
+    # Step 2: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    # Step 3: Install required packages
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    # Step 4: Run AI Review (using Groq API)
+    - name: Run AI Code Review
+      continue-on-error: true
+      env:
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        GITHUB_EVENT_NAME: ${{ github.event_name }}
+        GITHUB_BASE_REF: ${{ github.base_ref }}
+      run: |
+        if [ -z "$GROQ_API_KEY" ]; then
+          echo "⚠️ AI Review skipped: GROQ_API_KEY not set" >> $GITHUB_STEP_SUMMARY
+          echo "Add your Groq API key in Settings → Secrets → Actions" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        fi
+        
+        echo "## 🤖 AI Code Review (Groq - LLaMA)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        python scripts/review_changed_files.py >> $GITHUB_STEP_SUMMARY
+
+
