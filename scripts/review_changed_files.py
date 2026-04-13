@@ -98,7 +98,10 @@ def main():
             # Run AI review
             ai_result = reviewer.review_code(code, static_analysis=static_result)
             
-            # Print results
+            # Print both the Pylint report (including score) and AI review
+            print(analyzer.format_report(static_result))
+            print("\n---\n")
+            print("## 🤖 AI Detailed Review\n")
             print(ai_result['review'])
             print("\n---\n")
             
