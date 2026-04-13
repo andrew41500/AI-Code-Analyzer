@@ -1,6 +1,6 @@
 # test.py
-def calculate_area(radius):
+def calculate(a, b):
     # This is a bit messy - good for testing a reviewer!
-    import math
-    return 3.14 * radius * radius
-print(calculate_area(5))
+    return a + b
+
+print(calculate(5, 6))
